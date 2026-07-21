@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, type FormEvent } from "react";
 import {
   ArrowRight,
   ChevronRight,
@@ -8,21 +9,24 @@ import {
   X,
 } from "lucide-react";
 
-function InstagramIcon({ size = 20 }: { size?: number }) {
+function InstagramIcon({
+  className = "h-4 w-4",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
+      className={className}
       aria-hidden="true"
     >
-      <rect width="18" height="18" x="3" y="3" rx="5" />
+      <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
       <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
     </svg>
@@ -55,20 +59,88 @@ const principles = [
   },
 ];
 
+const developmentSteps = [
+  {
+    number: "01",
+    title: "Material selection",
+    text: "Testing fabric weight, texture and durability.",
+  },
+  {
+    number: "02",
+    title: "Fit development",
+    text: "Refining the silhouette through physical samples.",
+  },
+  {
+    number: "03",
+    title: "Final production",
+    text: "Beginning only after every detail is approved.",
+  },
+];
+
+const journalItems = [
+  {
+    title: "Sampling",
+    text: "Choosing the right manufacturer and reviewing the first physical samples.",
+  },
+  {
+    title: "Development",
+    text: "Adjusting measurements, construction and finishing based on real wear tests.",
+  },
+  {
+    title: "Launch",
+    text: "Producing a small first drop and introducing TheSoulStore to Calgary.",
+  },
+];
+
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
-  function handleSubscribe(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSubscribe(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
 
-    if (!email.trim()) return;
+  const cleanedEmail = email.trim();
 
-    // Replace this with your email platform integration before launch.
+  if (!cleanedEmail) {
+    setFormError("Please enter your email address.");
+    return;
+  }
+
+  setSubmitting(true);
+  setFormError("");
+
+  try {
+    const response = await fetch("/api/waitlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: cleanedEmail,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to join the waitlist.");
+    }
+
     setSubscribed(true);
     setEmail("");
+  } catch (error) {
+    setFormError(
+      error instanceof Error
+        ? error.message
+        : "Something went wrong. Please try again."
+    );
+  } finally {
+    setSubmitting(false);
   }
+}
 
   return (
     <main className="min-h-screen bg-white text-neutral-950">
@@ -125,8 +197,17 @@ export default function Home() {
       </header>
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/50 lg:hidden">
-          <div className="h-full w-[86%] max-w-sm bg-white p-6 shadow-2xl">
+        <div
+          className="fixed inset-0 z-[100] bg-black/50 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div
+            className="h-full w-[86%] max-w-sm bg-white p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex items-center justify-between">
               <span className="text-lg font-black tracking-[-0.055em]">
                 THE SOUL STORE
@@ -176,10 +257,11 @@ export default function Home() {
           alt="Minimal streetwear styling"
           className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
         />
+
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/90 via-black/65 to-black/20" />
 
         <div className="container-width flex min-h-[calc(100vh-112px)] items-center py-24">
-          <div className="max-w-3xl text-white fade-up">
+          <div className="fade-up max-w-3xl text-white">
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-neutral-300">
               Calgary, Canada
             </p>
@@ -198,7 +280,7 @@ export default function Home() {
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <a
                 href="#waitlist"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-4 text-sm font-bold text-black transition hover:bg-neutral-200"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white bg-black px-7 py-4 text-sm font-bold text-white transition hover:bg-neutral-800 hover:text-white"
               >
                 Get early access
                 <ArrowRight className="h-4 w-4" />
@@ -206,8 +288,7 @@ export default function Home() {
 
               <a
                 href="#about"
-                className="inline-flex items-center justify-center rounded-full border border-white/50 bg-black/20 px-7 py-4 text-sm font-bold text-white backdrop-blur transition hover:bg-white hover:text-black"
-              >
+                className="inline-flex items-center justify-center rounded-full border border-white bg-transparent px-7 py-4 text-sm font-bold text-white transition hover:bg-neutral-800 hover:text-white"              >
                 Discover the brand
               </a>
             </div>
@@ -215,16 +296,22 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="collection" className="border-b border-neutral-200 py-24 sm:py-32">
+      <section
+        id="collection"
+        className="border-b border-neutral-200 py-24 sm:py-32"
+      >
         <div className="container-width">
           <div className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
                 Collection 001
               </p>
+
               <h2 className="section-title mt-5">
                 Built slowly.
-                <span className="block text-neutral-400">Released with purpose.</span>
+                <span className="block text-neutral-400">
+                  Released with purpose.
+                </span>
               </h2>
             </div>
 
@@ -234,6 +321,7 @@ export default function Home() {
                 and refining every detail of our first release. Nothing goes
                 live until the fabric, fit and construction meet our standard.
               </p>
+
               <a
                 href="#waitlist"
                 className="mt-8 inline-flex items-center gap-2 border-b border-black pb-1 text-sm font-bold uppercase tracking-[0.14em]"
@@ -245,27 +333,30 @@ export default function Home() {
           </div>
 
           <div className="mt-16 grid gap-5 md:grid-cols-3">
-            {[
-              ["01", "Material selection", "Testing fabric weight, texture and durability."],
-              ["02", "Fit development", "Refining the silhouette through physical samples."],
-              ["03", "Final production", "Beginning only after every detail is approved."],
-            ].map(([number, title, text]) => (
+            {developmentSteps.map((step) => (
               <article
-                key={number}
+                key={step.number}
                 className="min-h-72 border border-neutral-200 bg-neutral-50 p-8"
               >
                 <span className="text-xs font-bold tracking-[0.2em] text-neutral-400">
-                  {number}
+                  {step.number}
                 </span>
-                <h3 className="mt-20 text-2xl font-black tracking-tight">{title}</h3>
-                <p className="mt-4 leading-7 text-neutral-600">{text}</p>
+
+                <h3 className="mt-20 text-2xl font-black tracking-tight">
+                  {step.title}
+                </h3>
+
+                <p className="mt-4 leading-7 text-neutral-600">{step.text}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="about" className="bg-neutral-950 py-24 text-white sm:py-32">
+      <section
+        id="about"
+        className="bg-neutral-950 py-24 text-white sm:py-32"
+      >
         <div className="container-width grid gap-16 lg:grid-cols-2 lg:items-center">
           <div className="relative min-h-[560px] overflow-hidden bg-neutral-900">
             <img
@@ -279,9 +370,11 @@ export default function Home() {
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-400">
               Our philosophy
             </p>
+
             <h2 className="mt-5 text-5xl font-black leading-[0.95] tracking-[-0.055em] sm:text-6xl">
               Clothing should feel personal, not disposable.
             </h2>
+
             <p className="mt-8 text-lg leading-8 text-neutral-300">
               TheSoulStore was created in Calgary for people who express
               confidence through simplicity. We are building a streetwear label
@@ -291,13 +384,19 @@ export default function Home() {
 
             <div className="mt-12 divide-y divide-neutral-800 border-y border-neutral-800">
               {principles.map((principle) => (
-                <div key={principle.number} className="grid gap-4 py-7 sm:grid-cols-[70px_1fr]">
+                <div
+                  key={principle.number}
+                  className="grid gap-4 py-7 sm:grid-cols-[70px_1fr]"
+                >
                   <span className="text-xs font-bold tracking-[0.2em] text-neutral-500">
                     {principle.number}
                   </span>
+
                   <div>
                     <h3 className="text-xl font-bold">{principle.title}</h3>
-                    <p className="mt-2 leading-7 text-neutral-400">{principle.text}</p>
+                    <p className="mt-2 leading-7 text-neutral-400">
+                      {principle.text}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -311,8 +410,12 @@ export default function Home() {
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
             Behind the brand
           </p>
+
           <div className="mt-5 grid gap-10 lg:grid-cols-2 lg:items-end">
-            <h2 className="section-title">Follow Collection 001 from sample to launch.</h2>
+            <h2 className="section-title">
+              Follow Collection 001 from sample to launch.
+            </h2>
+
             <p className="max-w-xl text-lg leading-8 text-neutral-600 lg:justify-self-end">
               We will share the process honestly: fabric tests, sample changes,
               campaign preparation and the decisions behind our first drop.
@@ -320,15 +423,20 @@ export default function Home() {
           </div>
 
           <div className="mt-14 grid gap-5 md:grid-cols-3">
-            {[
-              ["Sampling", "Choosing the right manufacturer and reviewing the first physical samples."],
-              ["Development", "Adjusting measurements, construction and finishing based on real wear tests."],
-              ["Launch", "Producing a small first drop and introducing TheSoulStore to Calgary."],
-            ].map(([title, text], index) => (
-              <article key={title} className="group border-t border-black pt-6">
-                <span className="text-xs font-bold text-neutral-400">0{index + 1}</span>
-                <h3 className="mt-12 text-3xl font-black tracking-tight">{title}</h3>
-                <p className="mt-4 leading-7 text-neutral-600">{text}</p>
+            {journalItems.map((item, index) => (
+              <article
+                key={item.title}
+                className="group border-t border-black pt-6"
+              >
+                <span className="text-xs font-bold text-neutral-400">
+                  0{index + 1}
+                </span>
+
+                <h3 className="mt-12 text-3xl font-black tracking-tight">
+                  {item.title}
+                </h3>
+
+                <p className="mt-4 leading-7 text-neutral-600">{item.text}</p>
               </article>
             ))}
           </div>
@@ -340,42 +448,59 @@ export default function Home() {
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
             Early access
           </p>
+
           <h2 className="mt-5 text-5xl font-black leading-none tracking-[-0.055em] sm:text-7xl">
             Join before the first drop.
           </h2>
+
           <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-neutral-600">
             Get launch updates, sample previews and first access to Collection
-            001. No spam—only meaningful updates from TheSoulStore.
+            001. No spam - only meaningful updates from TheSoulStore.
           </p>
 
           {subscribed ? (
-            <div className="mt-10 border border-neutral-300 bg-white p-6 font-bold">
-              You’re on the list. Welcome to TheSoulStore.
+            <div
+              className="mt-10 border border-neutral-300 bg-white p-6 font-bold"
+              role="status"
+            >
+              You&apos;re on the list. Welcome to TheSoulStore.
             </div>
           ) : (
             <form
               onSubmit={handleSubscribe}
-              className="mx-auto mt-10 flex max-w-2xl flex-col gap-3 sm:flex-row"
+              className="mx-auto mt-10 max-w-2xl"
             >
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="Enter your email address"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="min-h-14 flex-1 border border-neutral-300 bg-white px-5 outline-none transition focus:border-black"
-              />
-              <button
-                type="submit"
-                className="min-h-14 bg-black px-8 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-neutral-800"
-              >
-                Join waitlist
-              </button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <label htmlFor="email" className="sr-only">
+                  Email address
+                </label>
+
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  disabled={submitting}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="min-h-14 flex-1 border border-neutral-300 bg-white px-5 text-black outline-none transition placeholder:text-neutral-500 focus:border-black disabled:cursor-not-allowed disabled:opacity-60"
+                />
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="min-h-14 border border-black !bg-black px-8 text-sm font-bold uppercase tracking-[0.14em] !text-white transition hover:!bg-neutral-800 hover:!text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {submitting ? "Joining..." : "Join waitlist"}
+                </button>
+              </div>
+
+              {formError && (
+                <p className="mt-3 text-left text-sm font-medium text-red-600">
+                  {formError}
+                </p>
+              )}
             </form>
           )}
         </div>
@@ -388,13 +513,10 @@ export default function Home() {
               <h3 className="text-2xl font-black tracking-[-0.055em] text-white">
                 THE SOUL STORE
               </h3>
+
               <p className="mt-5 max-w-md leading-7 text-neutral-400">
                 Modern streetwear designed in Calgary. Collection 001 is
                 currently in development.
-              </p>
-              <p className="mt-7 text-sm text-neutral-500">
-                Replace the contact details below with your real business email
-                and social links before publishing.
               </p>
             </div>
 
@@ -402,11 +524,31 @@ export default function Home() {
               <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-white">
                 Explore
               </h4>
+
               <ul className="mt-5 space-y-3 text-sm text-neutral-400">
-                <li><a className="hover:text-white" href="#about">About</a></li>
-                <li><a className="hover:text-white" href="#journal">Journal</a></li>
-                <li><a className="hover:text-white" href="#waitlist">Waitlist</a></li>
-                <li><a className="hover:text-white" href="#contact">Contact</a></li>
+                <li>
+                  <a className="hover:text-white" href="#about">
+                    About
+                  </a>
+                </li>
+
+                <li>
+                  <a className="hover:text-white" href="#journal">
+                    Journal
+                  </a>
+                </li>
+
+                <li>
+                  <a className="hover:text-white" href="#waitlist">
+                    Waitlist
+                  </a>
+                </li>
+
+                <li>
+                  <a className="hover:text-white" href="#contact">
+                    Contact
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -414,29 +556,55 @@ export default function Home() {
               <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-white">
                 Connect
               </h4>
+
               <ul className="mt-5 space-y-3 text-sm text-neutral-400">
                 <li>
-                  <a className="inline-flex items-center gap-2 hover:text-white" href="mailto:hello@thesoulstore.ca">
+                  <a
+                    className="inline-flex items-center gap-2 hover:text-white"
+                    href="mailto:thesoulstore.ca@gmail.com"
+                  >
                     <Mail className="h-4 w-4" />
-                    hello@thesoulstore.ca
+                    thesoulstore.ca@gmail.com
                   </a>
                 </li>
+
                 <li>
-                  <a className="inline-flex items-center gap-2 hover:text-white" href="#">
-                    <Instagram className="h-4 w-4" />
+                  <a
+                    className="inline-flex items-center gap-2 hover:text-white"
+                    href="#"
+                    aria-label="TheSoulStore on Instagram"
+                  >
+                    <InstagramIcon />
                     Instagram
                   </a>
                 </li>
-                <li><a className="hover:text-white" href="#">TikTok</a></li>
+
+                <li>
+                  <a
+                    className="hover:text-white"
+                    href="#"
+                    aria-label="TheSoulStore on TikTok"
+                  >
+                    TikTok
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
 
           <div className="flex flex-col gap-4 pt-8 text-xs text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} TheSoulStore. All rights reserved.</p>
+            <p>
+              © {new Date().getFullYear()} TheSoulStore. All rights reserved.
+            </p>
+
             <div className="flex gap-5">
-              <a className="hover:text-white" href="#">Privacy</a>
-              <a className="hover:text-white" href="#">Terms</a>
+              <a className="hover:text-white" href="#">
+                Privacy
+              </a>
+
+              <a className="hover:text-white" href="#">
+                Terms
+              </a>
             </div>
           </div>
         </div>
