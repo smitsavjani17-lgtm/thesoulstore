@@ -240,9 +240,9 @@ export default function Home() {
             <a
               href="#waitlist"
               onClick={() => setMobileMenuOpen(false)}
-              className="mt-10 inline-flex w-full items-center justify-center rounded-full bg-black px-6 py-4 text-sm font-bold text-white"
+              className="mt-10 inline-flex w-full items-center justify-center rounded-full border border-black !bg-black px-6 py-4 text-sm font-bold !text-white transition hover:!bg-neutral-800 hover:!text-white"
             >
-              Join the waitlist
+              <span className="!text-white">Join the waitlist</span>
             </a>
           </div>
         </div>
