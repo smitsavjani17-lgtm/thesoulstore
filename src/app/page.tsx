@@ -253,8 +253,8 @@ export default function Home() {
         className="relative isolate min-h-[calc(100vh-112px)] overflow-hidden bg-neutral-950"
       >
         <img
-          src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=2000&q=85"
-          alt="Minimal streetwear styling"
+          src="/hero.jpg"
+          alt="TheSoulStore Hero"
           className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
         />
 
@@ -295,7 +295,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <section
         id="collection"
         className="border-b border-neutral-200 py-24 sm:py-32"
@@ -505,6 +504,7 @@ export default function Home() {
           )}
         </div>
       </section>
+      
 
       <footer id="contact" className="bg-black py-16 text-neutral-300">
         <div className="container-width">
