@@ -181,7 +181,7 @@ export default function Home() {
 
           <a
             href="#waitlist"
-            className="hidden rounded-full border border-black px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] transition hover:bg-black hover:text-white sm:inline-flex"
+            className="hidden items-center justify-center rounded-full border border-black !bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] !text-black transition hover:!bg-black hover:!text-white sm:inline-flex"
           >
             Join waitlist
           </a>
