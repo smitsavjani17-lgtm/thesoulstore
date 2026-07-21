@@ -6,38 +6,38 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://thesoulstore.ca"),
   title: {
-    default: "TheSoulStore | Premium T-Shirts & Streetwear",
+    default: "TheSoulStore | Modern Streetwear from Calgary",
     template: "%s | TheSoulStore",
   },
   description:
-    "Shop premium oversized, graphic, vintage and essential T-shirts from TheSoulStore. Comfortable fits, bold designs and everyday style.",
+    "TheSoulStore is a modern streetwear label from Calgary, Canada. Join the waitlist for early access to Collection 001.",
   keywords: [
     "TheSoulStore",
-    "T-shirt store",
-    "oversized T-shirts",
-    "graphic tees",
-    "streetwear",
-    "premium T-shirts",
-    "vintage T-shirts",
-    "online clothing store",
+    "Calgary streetwear",
+    "Canadian streetwear",
+    "modern streetwear",
+    "oversized clothing",
+    "Collection 001",
   ],
   openGraph: {
-    title: "TheSoulStore",
+    title: "TheSoulStore | Wear Your Soul",
     description:
-      "Premium oversized, graphic and essential T-shirts made for comfort, confidence and everyday expression.",
+      "Modern streetwear designed in Calgary. Join the waitlist for early access to Collection 001.",
     siteName: "TheSoulStore",
     locale: "en_CA",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "TheSoulStore",
+    title: "TheSoulStore | Wear Your Soul",
     description:
-      "Premium oversized, graphic and essential T-shirts made for everyday style.",
+      "Modern streetwear designed in Calgary. Collection 001 is currently in development.",
   },
   icons: {
     icon: "/icon.png",
