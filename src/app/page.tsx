@@ -38,7 +38,7 @@ const navigation = [
   ["Collection", "#collection"],
   ["About", "#about"],
   ["Journal", "#journal"],
-  ["Contact", "#contact"],
+  ["Contact", "/contact"],
 ];
 
 const principles = [
@@ -545,7 +545,7 @@ export default function Home() {
                 </li>
 
                 <li>
-                  <a className="hover:text-white" href="#contact">
+                  <a className="hover:text-white" href="/contact">
                     Contact
                   </a>
                 </li>
@@ -571,7 +571,7 @@ export default function Home() {
                 <li>
                   <a
                     className="inline-flex items-center gap-2 hover:text-white"
-                    href="#"
+                    href="https://www.instagram.com/thesoulstore.ca/"
                     aria-label="TheSoulStore on Instagram"
                   >
                     <InstagramIcon />
@@ -597,13 +597,25 @@ export default function Home() {
               © {new Date().getFullYear()} TheSoulStore. All rights reserved.
             </p>
 
-            <div className="flex gap-5">
-              <a className="hover:text-white" href="#">
+            <div className="flex flex-wrap gap-x-5 gap-y-3">
+              <a className="hover:text-white" href="/privacy">
                 Privacy
               </a>
 
-              <a className="hover:text-white" href="#">
+              <a className="hover:text-white" href="/terms">
                 Terms
+              </a>
+
+              <a className="hover:text-white" href="/shipping">
+                Shipping
+              </a>
+
+              <a className="hover:text-white" href="/returns">
+                Returns
+              </a>
+
+              <a className="hover:text-white" href="/contact">
+                Contact
               </a>
             </div>
           </div>
